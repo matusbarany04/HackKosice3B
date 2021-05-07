@@ -23,6 +23,10 @@ Lukáš Randuška, Stredná priemyselná škola elektrotechnická Košice Komens
  A.I.
  https://colab.research.google.com/drive/1r2Sc9mUpddR7JYpsr07SGNTRPLc8ETlO#scrollTo=UM2gc1ejqYZY
 
+ ## Presentation
+ ![Alt text](images/image(1).png?raw=true "first")
+ ![Alt text](images/image(2).png?raw=true "second")
+
 ## Challenges and accomplishments
   
   - successfull creation of artificial intelligence
