@@ -30,10 +30,6 @@ Lukáš Randuška, Stredná priemyselná škola elektrotechnická Košice Komens
   
   - successfull creation of artificial intelligence
   - successfull elipse portrayal
-
-## Next steps
-  -- add missing algorithms
-  -- learn openCV
   
 ## License
 
