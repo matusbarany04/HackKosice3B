@@ -24,9 +24,9 @@ Lukáš Randuška, Stredná priemyselná škola elektrotechnická Košice Komens
  https://colab.research.google.com/drive/1r2Sc9mUpddR7JYpsr07SGNTRPLc8ETlO#scrollTo=UM2gc1ejqYZY
 
  ## Presentation
- ![Alt text](images/img1.png?raw=true | width=100 "first" )
  <img src="images/img1.png" width="100">
- ![Alt text](images/img2.png =250x250?raw=true "second")
+ <img src="images/img2.png" width="100">
+ <img src="images/img3.png" width="100">
 
 ## Challenges and accomplishments
   
