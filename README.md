@@ -24,7 +24,7 @@ Lukáš Randuška, Stredná priemyselná škola elektrotechnická Košice Komens
  https://colab.research.google.com/drive/1r2Sc9mUpddR7JYpsr07SGNTRPLc8ETlO#scrollTo=UM2gc1ejqYZY
 
  ## Presentation
- <img src="images/img1.png" width="100">  <img src="images/img2.png" width="100">  <img src="images/img3.png" width="100">
+ <img src="images/img1.png" width="200">  <img src="images/img2.png" width="200">  <img src="images/img3.png" width="200">
 
 ## Challenges and accomplishments
   
@@ -37,4 +37,4 @@ Lukáš Randuška, Stredná priemyselná škola elektrotechnická Košice Komens
   
 ## License
 
-*This repository includes an [unlicense](http://unlicense.org/) statement though you may want [to choose a different license](https://choosealicense.com/).*
+*This repository includes an [unlicense](http://unlicense.org/)
