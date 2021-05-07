@@ -4,32 +4,22 @@ import tensorflow as tf
 import os
 import random
 import cmapy
-import math
+import csv
+import time
 
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 
-path = "prediction/a (64).tiff"
-
-# save predicted image
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-
-plt_img = plt.imread(path, 0)
-cv2.imshow("test", plt_img)
-cv2.waitKey(0)
-
-randint = random.randint(100000, 999999)
-
-if (os.path.isfile(f"savedPNGS/{randint}.png") is False):
-    plt.imsave(f"savedPNGS/{randint}.png", plt_img)
-    plt.imshow(plt_img, cmap='gray', interpolation='bicubic')
 
 # load model
 model = load_model("model/electronDetectAi.h5")
 
+randint = random.randint(100000, 999999)
 
-def makePredcition():
+# make prediction for image to recognize its category
+def makePredcition(path):
     p_img = cv2.imread(f"savedPNGS/{randint}.png")
     resized = cv2.resize(p_img, (982, 982), interpolation=cv2.INTER_AREA)
     x = image.img_to_array(resized)
@@ -41,34 +31,38 @@ def makePredcition():
         pred_val = model.predict(image)
         if (pred_val[0][np.argmax(pred_val)] <= 0.3):
             print("no match")
-            print(pred_val)
         else:
-            print(f"{np.argmax(pred_val) + 1} <- cislo suboru s najväcsim % | hodnoty pre vsetky subory -> {pred_val}")
+            return np.argmax(pred_val)
 
-    predict(stacked)
+    max_val = predict(stacked)
 
     plt_img = mpimg.imread(path)
     plt.imshow(plt_img)
 
+    return max_val
 
-def fitEllipse():
+
+# simple fitting algorythm
+def fitEllipseSimple(path):
+
+    # open png for fitting
     from_png = cv2.imread(f"savedPNGS/{randint}.png")
 
+    start_time = time.time()
+
+    img_name = path
+    img_name = img_name.split("/")
+    img_name = img_name[-1]
+
     gray_image = cv2.cvtColor(from_png, cv2.COLOR_BGR2GRAY)
-    hsv_image = cv2.cvtColor(from_png, cv2.COLOR_BGR2HSV)
 
     ret,thresh = cv2.threshold(gray_image,127,255,0)
 
     M = cv2.moments(thresh)
 
-    # calculate x,y coordinate of center
+    # get center
     cX = int(M["m10"] / M["m00"])
     cY = int(M["m01"] / M["m00"])
-
-    print(cX, cY)
-
-    cv2.circle(gray_image, (cX, cY), 5, (0, 255, 0), -1)
-    cv2.putText(gray_image, "centroid", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # gray scale mask
 
@@ -79,17 +73,30 @@ def fitEllipse():
 
     ellipse = cv2.fitEllipse(big_contour)
     (xc, yc), (d1, d2), angle = ellipse
-    print(xc, yc, d1, d1, angle)
 
     cv2.ellipse(from_png, ellipse, (255, 0, 0), 2)
 
     # display the image
     cv2.imshow("Image", from_png)
+
+    elapsed_time = (time.time() - start_time) * 1000
+
+    with open('output.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([img_name, xc, yc, d1, d2, angle, elapsed_time])
+
     cv2.waitKey(0)
     os.remove(os.path.join(f"savedPNGS/{randint}.png"))
 
-# fit grid cut off
-def fitE_gridCutOff():
+# fit more complex ellipsies
+def fitEllipseComplex(path):
+    png = cv2.imread(f"savedPNGS/{randint}.png")
+    start_time = time.time()
+
+    img_name = path
+    img_name = img_name.split("/")
+    img_name = img_name[-1]
+
     first_img = cv2.imread(path)
     img = cv2.applyColorMap(first_img, cmapy.cmap('flag_r'))
 
@@ -103,35 +110,72 @@ def fitE_gridCutOff():
 
     ellipse = cv2.fitEllipse(big_contour)
     (xc, yc), (d1, d2), angle = ellipse
-    print(xc, yc, d1, d1, angle)
 
     # draw ellipse
     result = img.copy()
-    cv2.ellipse(thresh, ellipse, (0, 255, 0), 3)
+    cv2.ellipse(png, ellipse, (255, 0, 255), 3)
 
     xc, yc = ellipse[0]
 
-    # draw vertical line
-    # compute major radius
-    rmajor = max(d1, d2) / 2
-    if angle > 90:
-        angle = angle - 90
-    else:
-        angle = angle + 90
-    print(angle)
-    xtop = xc + math.cos(math.radians(angle)) * rmajor
-    ytop = yc + math.sin(math.radians(angle)) * rmajor
-    xbot = xc + math.cos(math.radians(angle + 180)) * rmajor
-    ybot = yc + math.sin(math.radians(angle + 180)) * rmajor
-    cv2.line(result, (int(xtop), int(ytop)), (int(xbot), int(ybot)), (0, 0, 255), 3)
 
-    cv2.imshow("labrador_thresh", thresh)
-    cv2.waitKey(0)
+    cv2.imshow("final", png)
+    elapsed_time = (time.time() - start_time) * 1000
+
+    with open('output.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([img_name, xc, yc, d1, d2, angle, elapsed_time])
+
+
     os.remove(os.path.join(f"savedPNGS/{randint}.png"))
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
+def main(path):
+    # write png for fitting
+    plt_img = plt.imread(path, 0)
 
-if __name__ == "__main__":
-    makePredcition()
-    fitE_gridCutOff()
+    if (os.path.exists("savedPNGS") is False):
+        os.mkdir("savedPNGS")
+        if (os.path.isfile(f"savedPNGS/{randint}.png") is False):
+            plt.imsave(f"savedPNGS/{randint}.png", plt_img)
+    else:
+        if (os.path.isfile(f"savedPNGS/{randint}.png") is False):
+            plt.imsave(f"savedPNGS/{randint}.png", plt_img)
+
+    res = makePredcition(path)
+    pred_val = res+1
+
+    if (pred_val == 2 or pred_val == 1):
+        try:
+            fitEllipseSimple(path)
+        except:
+            try:
+                fitEllipseComplex(path)
+            except:
+                with open('output.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["couldn't fit ellipse in the image"])
+
+    elif (pred_val == 3 or pred_val == 4 or pred_val == 5 or pred_val == 6 or pred_val == 7):
+        try:
+            fitEllipseComplex(path)
+        except:
+            try:
+                fitEllipseSimple(path)
+            except:
+                with open('output.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["couldn't fit ellipse in the image"])
+    else:
+        try:
+            fitEllipseComplex(path)
+        except:
+            with open('output.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["couldn't fit ellipse in the image"])
+
+
+
+
+main("pewdicrion/ilumination_2/g (6).tiff")
